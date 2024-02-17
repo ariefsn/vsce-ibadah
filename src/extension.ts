@@ -39,8 +39,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	await init()
 
 	// Commands
-	const PrayerConfigure = vscode.commands.registerCommand(IbadahCommandKeys.PRAYER_CONFIGURE, async () => {
-		await onFetch()
+	const PrayerConfigure = vscode.commands.registerCommand(IbadahCommandKeys.PRAYER_CONFIGURE, () => {
+		vscode.commands.executeCommand('workbench.action.openSettingsJson', { revealSetting: { key: 'ibadah' } });
 	});
 
 	const PrayerRefresh = vscode.commands.registerCommand(IbadahCommandKeys.PRAYER_REFRESH, async () => {
