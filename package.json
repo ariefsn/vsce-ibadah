@@ -1,0 +1,159 @@
+{
+  "name": "ibadah",
+  "displayName": "Ibadah",
+  "description": "The Ibadah plugin for VSCode can show Muslim prayer time at the status bar and popup notification. Fully customizable.",
+  "icon": "src/assets/icon.png",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.86.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "publisher": "ariefsn",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ariefsn/vsce-ibadah"
+  },
+  "bugs": {
+    "url": "https://github.com/ariefsn/vsce-ibadah/issues",
+    "email": "ayiexz22@gmail.com"
+  },
+  "author": {
+    "name": "Arief Setiyo Nugroho",
+    "url": "https://github.com/ariefsn"
+  },
+  "license": "MIT",
+  "maintainers": [
+    {
+      "name": "Arief Setiyo Nugroho",
+      "email": "ayiexz22@gmail.com",
+      "url": "https://github.com/ariefsn"
+    }
+  ],
+  "keywords": [
+    "ibadah",
+    "sholat",
+    "muslim",
+    "moslem",
+    "islam"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "ibadah.pray.configure",
+        "title": "Ibadah: Pray Configure"
+      },
+      {
+        "command": "ibadah.pray.refresh",
+        "title": "Ibadah: Pray Refresh"
+      }
+    ],
+    "configuration": {
+      "title": "Ibadah",
+      "properties": {
+        "ibadah.pray": {
+          "type": "object",
+          "description": "Ibadah configuration",
+          "properties": {
+            "country": {
+              "type": "string",
+              "description": "Country to get prayer times for",
+              "default": "Indonesia"
+            },
+            "city": {
+              "type": "string",
+              "description": "City to get prayer times for",
+              "default": "Surabaya"
+            },
+            "notification": {
+              "type": "object",
+              "description": "Notification configuration",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "description": "The message that notification will show, use {pray} to insert the prayer name",
+                  "default": "It's time to pray {pray}"
+                },
+                "before": {
+                  "type": "number",
+                  "description": "The minutes that notification will show before the prayer time",
+                  "default": 15
+                }
+              }
+            },
+            "names": {
+              "type": "object",
+              "description": "Pray names configuration",
+              "properties": {
+                "Fajr": {
+                  "type": "string",
+                  "description": "The custom name for Fajr",
+                  "default": "Fajr"
+                },
+                "Dhuhr": {
+                  "type": "string",
+                  "description": "The custom name for Dhuhr",
+                  "default": "Dhuhr"
+                },
+                "Asr": {
+                  "type": "string",
+                  "description": "The custom name for Asr",
+                  "default": "Asr"
+                },
+                "Maghrib": {
+                  "type": "string",
+                  "description": "The custom name for Maghrib",
+                  "default": "Maghrib"
+                },
+                "Isha": {
+                  "type": "string",
+                  "description": "The custom name for Isha",
+                  "default": "Isha"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "configurationDefaults": {
+      "[ibadah]": {
+        "pray": {
+          "country": "Indonesia",
+          "city": "Surabaya",
+          "beforeMinutes": 15
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn run compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@types/node-schedule": "^2.1.6",
+    "@types/vscode": "^1.86.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
+    "@vscode/test-cli": "^0.0.4",
+    "@vscode/test-electron": "^2.3.9",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "dayjs": "^1.11.10",
+    "node-schedule": "^2.1.1"
+  }
+}
