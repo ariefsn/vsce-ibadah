@@ -1,14 +1,12 @@
 export enum IbadahStoreKeys {
-  PRAYER_CALENDAR_CITY = "ibadah.pray.calendarByCity",
-  PRAYER_COUNTRY = "ibadah.pray.country",
-  PRAYER_CITY = "ibadah.pray.city",
-  PRAYER_BEFORE_TIME = "ibadah.pray.before"
+  PRAYER_TIMES = "ibadah.pray.calendarByCity",
 }
 
 export enum IbadahConfigKeys {
-  PRAYER_CALENDAR_CITY = "pray.calendarByCity",
-  PRAYER_COUNTRY = "pray.country",
-  PRAYER_CITY = "pray.city",
+  LOCATION_COUNTRY = "location.country",
+  LOCATION_CITY = "location.city",
+  LOCATION_POSTALCODE = "pray.postalCode",
+  LOCATION_ADDRESS = "pray.address",
   PRAYER_NOTIFICATION_BEFORE = "pray.notification.before",
   PRAYER_NOTIFICATION_MESSAGE = "pray.notification.message",
   PRAYER_NAMES = "pray.names"

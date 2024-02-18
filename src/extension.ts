@@ -3,7 +3,7 @@
 import dayjs, { Dayjs } from 'dayjs';
 import { scheduleJob } from 'node-schedule';
 import * as vscode from 'vscode';
-import { IMap, IPrayer, ITimings } from './entities';
+import { IMap, IPrayer, IPrayerByCalendarCityDto, ITimings } from './entities';
 import { IbadahCommandKeys, IbadahConfigKeys, IbadahPrayTime, IbadahStoreKeys, config as _config, store as _store, http } from './helper';
 import { Prayer } from './services';
 dayjs.extend(require('dayjs/plugin/customParseFormat'));
@@ -15,16 +15,22 @@ let nextPrayTime: IbadahPrayTime | undefined
 
 const init = async () => {
 	const config = _config()
+	const cfgLocation = {
+		"country": config.get<string>(IbadahConfigKeys.LOCATION_COUNTRY) || "Indonesia",
+		"city": config.get<string>(IbadahConfigKeys.LOCATION_CITY) || "Surabaya",
+		"postalCode": config.get<string>(IbadahConfigKeys.LOCATION_POSTALCODE) || ""
+	}
 	const cfgPray = {
-		"country": config.get<string>(IbadahConfigKeys.PRAYER_COUNTRY) || "Indonesia",
-		"city": config.get<string>(IbadahConfigKeys.PRAYER_CITY) || "Surabaya",
 		"notification": {
 			"before": config.get<number>(IbadahConfigKeys.PRAYER_NOTIFICATION_BEFORE) || 10,
 			"message": config.get<string>(IbadahConfigKeys.PRAYER_NOTIFICATION_MESSAGE) || "It's time to pray {pray}"
 		},
 		"names": config.get<IMap>(IbadahConfigKeys.PRAYER_NAMES)
 	}
-	await config.set("pray", cfgPray)
+	await Promise.all([
+		config.set("location", cfgLocation),
+		config.set("pray", cfgPray)
+	])
 	prayStatusbarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, -100)
 	prayStatusbarItem.text = "Loading"
 	vscode.window.showInformationMessage("Ibadah extension is now active! You can customize configurations in the settings :)")
@@ -34,7 +40,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	const _http = http()
 	const prayerService = new Prayer(_http)
 	const store = _store(context)
-	store.sync([IbadahStoreKeys.PRAYER_CITY, IbadahStoreKeys.PRAYER_COUNTRY])
+	store.sync([IbadahStoreKeys.PRAYER_TIMES])
 
 	await init()
 
@@ -49,19 +55,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(PrayerConfigure, PrayerRefresh);
 
-	const fetchPrayItems = async (country: string, city: string, year: number, month: number, method: number = 2, force: boolean): Promise<IPrayer[]> => {
-		let prayItems = store.get<IPrayer[]>(IbadahStoreKeys.PRAYER_CALENDAR_CITY) ?? []
+	const fetchPrayItems = async (payload: IPrayerByCalendarCityDto, force: boolean): Promise<IPrayer[]> => {
+		let prayItems = store.get<IPrayer[]>(IbadahStoreKeys.PRAYER_TIMES) ?? []
 		if (prayItems?.length < 1 || force) {
-			const res = await prayerService.getPrayerByCalendarCity({
-				country,
-				city,
-				year,
-				month,
-				method
-			})
+			console.log('[Ibadah] Fetching prayer times...')
+			const res = await prayerService.getPrayerByAddress(payload)
 
 			if (res?.code === 200 && res?.data) {
-				store.set(IbadahStoreKeys.PRAYER_CALENDAR_CITY, res.data)
+				store.set(IbadahStoreKeys.PRAYER_TIMES, res.data)
 				prayItems = res.data
 				return prayItems
 			} else {
@@ -75,8 +76,8 @@ export async function activate(context: vscode.ExtensionContext) {
 			const now = dayjs()
 
 			if (!dates.includes(now.format('DD-MM-YYYY'))) {
-				store.del(IbadahStoreKeys.PRAYER_CALENDAR_CITY)
-				prayItems = await fetchPrayItems(country, city, year, month, method, force)
+				store.del(IbadahStoreKeys.PRAYER_TIMES)
+				prayItems = await fetchPrayItems(payload, force)
 			}
 		}
 
@@ -86,12 +87,18 @@ export async function activate(context: vscode.ExtensionContext) {
 	const onFetch = async (force: boolean = false) => {
 		const config = _config()
 		const cfg = {
-			country: config.get<string>(IbadahConfigKeys.PRAYER_COUNTRY) ?? '',
-			city: config.get<string>(IbadahConfigKeys.PRAYER_CITY) ?? '',
+			country: config.get<string>(IbadahConfigKeys.LOCATION_COUNTRY) ?? '',
+			city: config.get<string>(IbadahConfigKeys.LOCATION_CITY) ?? '',
+			postalCode: config.get<string>(IbadahConfigKeys.LOCATION_POSTALCODE) ?? '',
 			beforeMinutes: config.get<number>(IbadahConfigKeys.PRAYER_NOTIFICATION_BEFORE) ?? 15,
 			message: config.get<string>(IbadahConfigKeys.PRAYER_NOTIFICATION_MESSAGE) ?? `It's time to pray {pray}`,
 		}
 		if (!cfg.country || !cfg.city) {
+			await store.del(IbadahStoreKeys.PRAYER_TIMES)
+			prayStatusbarItem.text = `Ibadah`
+			prayStatusbarItem.tooltip = `Invalid configurations`
+			prayStatusbarItem.command = IbadahCommandKeys.PRAYER_CONFIGURE
+			prayStatusbarItem.show()
 			const action = await vscode.window.showInformationMessage('Please configure your location to enable prayer times.', ...['Configure'])
 			switch (action) {
 				case 'Configure':
@@ -106,7 +113,14 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		const now = dayjs()
 		const tomorrow = now.add(1, 'day')
-		const prayItems = await fetchPrayItems(cfg.country, cfg.city, now.year(), now.month() + 1, 2, force)
+		const prayItems = await fetchPrayItems({
+			country: cfg.country,
+			city: cfg.city,
+			postalCode: cfg.postalCode,
+			method: 2,
+			month: now.month() + 1,
+			year: now.year()
+		}, force)
 
 		const todayPray = prayItems.find(item => {
 			return item.date.gregorian.date === now.format('DD-MM-YYYY')

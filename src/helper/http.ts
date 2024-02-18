@@ -1,4 +1,4 @@
-import { AxiosInstance, create } from "axios";
+import axios, { type AxiosInstance } from "axios";
 
 let _http: AxiosInstance | undefined;
 
@@ -8,12 +8,13 @@ const http = (): AxiosInstance => {
   }
 
   // https://api.aladhan.com/v1/calendarByCity/2024/2?city=Ngawi&country=Indonesia&method=2
-  _http = create({
+  _http = axios.create({
     baseURL: "https://api.aladhan.com/v1"
   });
 
   return _http
 }
+
 export {
   http
 };

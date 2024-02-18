@@ -18,4 +18,18 @@ export default class Prayer {
     })
     return data
   }
+
+  getPrayerByAddress = async (payload: IPrayerByCalendarCityDto): Promise<IHttpResponse<IPrayer[]>> => {
+    const address = [payload.postalCode, payload.city, payload.country]
+    if (payload.address) {
+      address.unshift(payload.address)
+    }
+    const { data } = await this._http.get<IHttpResponse<IPrayer[]>>(`/calendarByAddress/${payload.year}/${payload.month}`, {
+      params: {
+        address: address.join(','),
+        method: payload.method
+      }
+    })
+    return data
+  }
 }

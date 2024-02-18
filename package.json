@@ -56,9 +56,9 @@
     "configuration": {
       "title": "Ibadah",
       "properties": {
-        "ibadah.pray": {
+        "ibadah.location": {
           "type": "object",
-          "description": "Ibadah configuration",
+          "description": "Location configuration",
           "properties": {
             "country": {
               "type": "string",
@@ -70,6 +70,22 @@
               "description": "City to get prayer times for",
               "default": "Surabaya"
             },
+            "postalCode": {
+              "type": "string",
+              "description": "Postal code to get prayer times for",
+              "default": ""
+            },
+            "address": {
+              "type": "string",
+              "description": "Address to get prayer times for",
+              "default": ""
+            }
+          }
+        },
+        "ibadah.pray": {
+          "type": "object",
+          "description": "Pray configuration",
+          "properties": {
             "notification": {
               "type": "object",
               "description": "Notification configuration",
@@ -132,12 +148,17 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "yarn run compile",
+    "vscode:prepublish:default": "yarn run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "yarn run compile && yarn run lint",
     "lint": "eslint src --ext ts",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "vscode:prepublish": "yarn esbuild-base -- --minify",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "yarn esbuild-base -- --sourcemap",
+    "esbuild-watch": "yarn esbuild-base -- --sourcemap --watch",
+    "test-compile": "tsc -p ./"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.6",
@@ -148,6 +169,7 @@
     "@typescript-eslint/parser": "^6.19.1",
     "@vscode/test-cli": "^0.0.4",
     "@vscode/test-electron": "^2.3.9",
+    "esbuild": "^0.20.0",
     "eslint": "^8.56.0",
     "typescript": "^5.3.3"
   },

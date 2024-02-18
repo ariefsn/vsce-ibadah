@@ -3,5 +3,7 @@ export interface IPrayerByCalendarCityDto {
   month: number
   city: string
   country: string
+  postalCode: string
+  address?: string
   method: number
 }

@@ -19,9 +19,13 @@ The Ibadah plugin for VSCode can show Muslim prayer time at the status bar and p
 - Default settings
 
   ```typescript
-  "ibadah.pray": {
+  "ibadah.location": {
     "country": "Indonesia",
     "city": "Surabaya",
+    "postalCode": "",
+    "address": ""
+  },
+  "ibadah.pray": {
     "notification": {
       "before": 15, // The notification will show before the actual time, in minutes.
       "message": "It's time to pray {pray}" // The {pray} will replaced with the actual pray time. Customizable with the names below.
