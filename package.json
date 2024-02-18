@@ -3,7 +3,7 @@
   "displayName": "Ibadah",
   "description": "The Ibadah plugin for VSCode can show Muslim prayer time at the status bar and popup notification. Fully customizable.",
   "icon": "assets/icon.png",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.86.0"
   },
